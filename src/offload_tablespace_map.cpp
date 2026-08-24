@@ -78,22 +78,24 @@ Oid YezzeyGetRelationOriginTablespaceOid(const char *nspname,
                                          const char *relname, Oid i_reloid) {
   auto scpname = YezzeyGetRelationOriginTablespace(nspname, relname, i_reloid);
   auto spcoid = get_tablespace_oid(scpname.c_str(), false);
-  
+
   /*
    * If we got pg_default but the relation is in a custom tablespace,
    * try to get the actual tablespace from pg_class
    */
-  if (spcoid == DEFAULTTABLESPACE_OID && strcmp(scpname.c_str(), "pg_default") == 0) {
+  if (spcoid == DEFAULTTABLESPACE_OID &&
+      strcmp(scpname.c_str(), "pg_default") == 0) {
     auto classtuple = SearchSysCache1(RELOID, ObjectIdGetDatum(i_reloid));
     if (HeapTupleIsValid(classtuple)) {
-      auto reltablespace = ((Form_pg_class)GETSTRUCT(classtuple))->reltablespace;
+      auto reltablespace =
+          ((Form_pg_class)GETSTRUCT(classtuple))->reltablespace;
       ReleaseSysCache(classtuple);
       if (reltablespace != InvalidOid) {
         return reltablespace;
       }
     }
   }
-  
+
   return spcoid;
 }
 
