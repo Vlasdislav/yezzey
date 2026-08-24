@@ -112,17 +112,17 @@ The message `yezzey: relation segment reached external storage (blkno=385), up t
 
 Invoke one of the following functions:
 
-    * With the table name specified:
+* With the table name specified:
 
-        ```sql
-        SELECT yezzey_load_relation('<table_name>');
-        ```
+    ```sql
+    SELECT yezzey_load_relation('<table_name>');
+    ```
 
-    * With the schema the table is in and the table name specified:
+* With the schema the table is in and the table name specified:
 
-        ```sql
-        SELECT yezzey_load_relation('<schema_name>', '<table_name>');
-        ```
+    ```sql
+    SELECT yezzey_load_relation('<schema_name>', '<table_name>');
+    ```
 
 The time the download takes depends on the table size and the number of segment files. After the download is completed, you will get a message in the following format:
 
@@ -134,18 +134,18 @@ INFO:  loaded relation ... to local storage
 
 Just query extension:
 
-        ```sql
-        SELECT * FROM yezzey_offload_relation_status('<имя_схемы>', '<имя_таблицы>');
-        ```
+```sql
+SELECT * FROM yezzey_offload_relation_status('<имя_схемы>', '<имя_таблицы>');
+```
 The query result contains the following fields:
 
-    | Field | Description |
-    |------|----------|
-    | `offload_reloid` | OID of the object. |
-    | `segindex` | Segment ID. The value `-1` corresponds to the master. |
-    | `local_bytes` | The size of the data stored in the cluster storage. If '0`, the table is unloaded. |
-    | `external_bytes` | The size of the data uploaded to the cold storage. If all values in the column are zero, the table is placed in the cluster storage. If the column has non-zero values, the table is placed in cold storage.|
-    | `external_bloat_bytes` | The size of the data uploaded to the cold storage that is no longer in use but has not yet been deleted. |
+| Field | Description |
+|------|----------|
+| `offload_reloid` | OID of the object. |
+| `segindex` | Segment ID. The value `-1` corresponds to the master. |
+| `local_bytes` | The size of the data stored in the cluster storage. If '0`, the table is unloaded. |
+| `external_bytes` | The size of the data uploaded to the cold storage. If all values in the column are zero, the table is placed in the cluster storage. If the column has non-zero values, the table is placed in cold storage.|
+| `external_bloat_bytes` | The size of the data uploaded to the cold storage that is no longer in use but has not yet been deleted. |
 
 
 ## Algorithms
