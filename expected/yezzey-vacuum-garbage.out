@@ -6,30 +6,30 @@ CREATE TABLESPACE vacuum_garbage_tab1 LOCATION '/tmp/test_spc_vacuum_garbage_tab
 CREATE TABLESPACE vacuum_garbage_tab2 LOCATION '/tmp/test_spc_vacuum_garbage_tab2';
 CREATE TABLE vacuum_garbage_aot(i INT) WITH (appendonly=true) DISTRIBUTED BY (i);
 SELECT yezzey_define_offload_policy('vacuum_garbage_aot');
- yezzey_define_offload_policy 
-------------------------------
- 
+                   yezzey_define_offload_policy                   
+------------------------------------------------------------------
+ offloaded relation public.vacuum_garbage_aot to external storage
 (1 row)
 
 CREATE TABLE vacuum_garbage_aot_r(i INT) WITH (appendonly=true) DISTRIBUTED BY (i);
 SELECT yezzey_define_offload_policy('vacuum_garbage_aot_r');
- yezzey_define_offload_policy 
-------------------------------
- 
+                    yezzey_define_offload_policy                    
+--------------------------------------------------------------------
+ offloaded relation public.vacuum_garbage_aot_r to external storage
 (1 row)
 
 CREATE TABLE vacuum_garbage_ts1(i INT) WITH (appendonly=true) TABLESPACE vacuum_garbage_tab1 DISTRIBUTED BY (i);
 SELECT yezzey_define_offload_policy('vacuum_garbage_ts1');
- yezzey_define_offload_policy 
-------------------------------
- 
+                   yezzey_define_offload_policy                   
+------------------------------------------------------------------
+ offloaded relation public.vacuum_garbage_ts1 to external storage
 (1 row)
 
 CREATE TABLE vacuum_garbage_ts2(i INT) WITH (appendonly=true) TABLESPACE vacuum_garbage_tab2 DISTRIBUTED BY (i);
 SELECT yezzey_define_offload_policy('vacuum_garbage_ts2');
- yezzey_define_offload_policy 
-------------------------------
- 
+                   yezzey_define_offload_policy                   
+------------------------------------------------------------------
+ offloaded relation public.vacuum_garbage_ts2 to external storage
 (1 row)
 
 -- check how it work with ONLY given relation
@@ -79,8 +79,10 @@ SELECT count(1) FROM yezzey_relation_describe_external_storage_structure('vacuum
 SELECT yezzey_vacuum_garbage_relation('vacuum_garbage_aot_r', true, true);
  yezzey_vacuum_garbage_relation 
 --------------------------------
- 
-(1 row)
+ f
+ f
+ f
+(3 rows)
 
 -- should single file.
 SELECT count(1) FROM yezzey_relation_describe_external_storage_structure('vacuum_garbage_aot_r');
@@ -113,9 +115,9 @@ SELECT count(1) FROM yezzey_relation_describe_external_storage_structure('vacuum
 SELECT yezzey_vacuum_garbage_tablespace((SELECT oid FROM pg_tablespace WHERE spcname = 'vacuum_garbage_tab1'), true, true);
  yezzey_vacuum_garbage_tablespace 
 ----------------------------------
- 
- 
- 
+ f
+ f
+ f
 (3 rows)
 
 SELECT count(1) FROM yezzey_relation_describe_external_storage_structure('vacuum_garbage_ts1');
@@ -139,11 +141,11 @@ SELECT count(1) FROM yezzey_relation_describe_external_storage_structure('vacuum
 
 -- should be one file in each relation
 SELECT yezzey_vacuum_garbage(true, true);
- yezzey_vacuum_garbage
+ yezzey_vacuum_garbage 
 -----------------------
- 
- 
- 
+ f
+ f
+ f
 (3 rows)
 
 SELECT count(1) FROM yezzey_relation_describe_external_storage_structure('vacuum_garbage_aot');
@@ -176,11 +178,11 @@ DROP TABLE vacuum_garbage_ts1;
 DROP TABLE vacuum_garbage_ts2;
 -- should be zero
 SELECT yezzey_vacuum_garbage(true, true);
- yezzey_vacuum_garbage
+ yezzey_vacuum_garbage 
 -----------------------
- 
- 
- 
+ f
+ f
+ f
 (3 rows)
 
 SELECT count(1) FROM yezzey_relation_describe_external_storage_structure('vacuum_garbage_aot');
