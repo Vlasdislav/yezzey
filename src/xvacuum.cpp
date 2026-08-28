@@ -40,15 +40,16 @@ void yezzey_delete_chunk_internal(const char *external_chunk_path) {
   }
 }
 
-void yezzey_vacuum_garbage_tablespace_internal(Oid tablespace, int segindx,
+void yezzey_vacuum_garbage_tablespace_internal(Oid tablespaceOid, int segindx,
                                                bool confirm, bool crazyDrop) {
   try {
     auto ioadv = std::make_shared<IOadv>(
         "", "", std::string(storage_class /*storage_class*/),
-        multipart_chunksize, tablespace, "" /* coords */,
+        multipart_chunksize, tablespaceOid, "" /* coords */,
         InvalidOid /* reloid */, use_gpg_crypto, yproxy_socket);
 
-    std::string storage_path(yezzey_block_namespace_path(segindx));
+    std::string storage_path(
+        yezzey_block_tablespace_path(tablespaceOid, segindx));
 
     auto deleter = std::make_shared<YProxyDeleter>(ioadv, ssize_t(segindx),
                                                    confirm, crazyDrop);

@@ -98,6 +98,7 @@ Oid YezzeyGetRelationOriginTablespaceOid(const char *nspname,
           ((Form_pg_class)GETSTRUCT(classtuple))->reltablespace;
       ReleaseSysCache(classtuple);
       if (reltablespace != InvalidOid &&
+          // Tablespace may have already been migrated to Yezzey
           reltablespace != YEZZEYTABLESPACE_OID) {
         return reltablespace;
       }
