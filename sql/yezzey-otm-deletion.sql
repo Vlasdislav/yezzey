@@ -1,4 +1,3 @@
-
 CREATE EXTENSION yezzey VERSION '1.0';
 
 -- check that load result of is correct
