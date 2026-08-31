@@ -10,51 +10,41 @@ YProxyWriter::YProxyWriter(std::shared_ptr<IOadv> adv, ssize_t segindx,
                            ssize_t modcount, const std::string &storage_path)
     : YProxyConnector(adv, segindx), modcount_(modcount),
       insertion_rec_ptr_(yezzeyGetXStorageInsertLsn()),
-      storage_path_(createXPath()), connection_established_(false) {}
+      storage_path_(createXPath()) {}
 
 YProxyWriter::~YProxyWriter() { close(); }
 
 // complete external storage interaction.
 // TBD: smgr_FileSync() here ?
 bool YProxyWriter::close() {
-  if (client_fd_ == -1 || !connection_established_) {
-    connection_established_ = false;
+  if (client_fd_ == -1) {
     return true;
   }
   const auto msg = CommonCostructCopyDoneRequest();
 
   // signal that current chunk is full
   if (commonWriteFull(client_fd_, msg) == -1) {
-    elog(WARNING, "yezzey: failed to write CopyDone message to yproxy");
     ::close(client_fd_);
     client_fd_ = -1;
-    connection_established_ = false;
     return false;
   }
 
   if (readPutCompleteResponce(client_fd_) != 0) {
-    elog(WARNING, "yezzey: failed to read PutComplete response from yproxy");
     ::close(client_fd_);
     client_fd_ = -1;
-    connection_established_ = false;
     // TODO: handle
     return false;
   }
 
   // wait for responce
   if (commonReadRFQResponce(client_fd_) != 0) {
-    elog(WARNING, "yezzey: failed to read ReadyForQuery response from yproxy");
     ::close(client_fd_);
     client_fd_ = -1;
-    connection_established_ = false;
     // some error, handle
     return false;
   }
-  if (client_fd_ != -1) {
-    ::close(client_fd_);
-    client_fd_ = -1;
-  }
-  connection_established_ = false;
+  ::close(client_fd_);
+  client_fd_ = -1;
   return true;
 }
 
@@ -73,7 +63,6 @@ bool YProxyWriter::write(const char *buffer, size_t *amount) {
     // Be tidy
     ::close(client_fd_);
     client_fd_ = -1;
-    connection_established_ = false;
     *amount = 0;
     return false;
   }
@@ -95,11 +84,9 @@ int YProxyWriter::prepareYproxyConnection() {
     // Be tidy
     ::close(client_fd_);
     client_fd_ = -1;
-    connection_established_ = false;
     return -1;
   }
 
-  connection_established_ = true;
   return 0;
 }
 

@@ -30,7 +30,6 @@ private:
   XLogRecPtr insertion_rec_ptr_;
   std::string storage_path_;
   uint16_t key_version;
-  bool connection_established_{false};
 
 public:
   std::string getExternalStoragePath() { return storage_path_; }
