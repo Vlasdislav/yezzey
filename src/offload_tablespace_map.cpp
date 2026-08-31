@@ -77,35 +77,7 @@ static std::string y_stringify_rv(const char *nspname, const char *relname) {
 Oid YezzeyGetRelationOriginTablespaceOid(const char *nspname,
                                          const char *relname, Oid i_reloid) {
   auto scpname = YezzeyGetRelationOriginTablespace(nspname, relname, i_reloid);
-  auto spcoid = get_tablespace_oid(scpname.c_str(), false);
-
-  /*
-   * If OTM returned "pg_default" but the relation is physically in a
-   * custom tablespace (i.e. it has no OTM entry yet), fall back to
-   * pg_class.reltablespace to get the true origin tablespace.
-   *
-   * IMPORTANT: skip this fallback when reltablespace is YEZZEYTABLESPACE_OID
-   * (the relation has already been offloaded). In that case the OTM value IS
-   * the correct origin tablespace; using the current pg_class value would
-   * return the yezzey tablespace OID and corrupt every S3 path prefix built
-   * from spcNode.
-   */
-  if (spcoid == DEFAULTTABLESPACE_OID &&
-      strcmp(scpname.c_str(), "pg_default") == 0) {
-    auto classtuple = SearchSysCache1(RELOID, ObjectIdGetDatum(i_reloid));
-    if (HeapTupleIsValid(classtuple)) {
-      auto reltablespace =
-          ((Form_pg_class)GETSTRUCT(classtuple))->reltablespace;
-      ReleaseSysCache(classtuple);
-      if (reltablespace != InvalidOid &&
-          // Tablespace may have already been migrated to Yezzey
-          reltablespace != YEZZEYTABLESPACE_OID) {
-        return reltablespace;
-      }
-    }
-  }
-
-  return spcoid;
+  return get_tablespace_oid(scpname.c_str(), false);
 }
 
 std::string YezzeyGetRelationOriginTablespace(const char *nspname,
