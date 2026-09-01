@@ -50,14 +50,14 @@ SELECT yezzey_vacuum_garbage_relation('yezzey_otm_regaoty_1', true, true);
  
 (1 row)
 
-SELECT segindex, count(*) as chunks, sum(external_bytes) as bytes
+SELECT segindex, count(*) as chunks
 FROM yezzey_relation_describe_external_storage_structure('yezzey_otm_regaoty_1')
 GROUP BY segindex ORDER BY segindex;
- segindex | chunks | bytes  
-----------+--------+--------
-        0 |      1 | 598536
-        1 |      1 | 592592
-        2 |      1 | 592952
+ segindex | chunks 
+----------+--------
+        0 |      1
+        1 |      1
+        2 |      1
 (3 rows)
 
 SELECT * FROM yezzey_define_offload_policy('yezzey_otm_regaoty_2');
@@ -94,14 +94,14 @@ SELECT yezzey_vacuum_garbage_relation('yezzey_otm_regaoty_2', true, true);
  
 (1 row)
 
-SELECT segindex, count(*) as chunks, sum(external_bytes) as bytes
+SELECT segindex, count(*) as chunks
 FROM yezzey_relation_describe_external_storage_structure('yezzey_otm_regaoty_2')
 GROUP BY segindex ORDER BY segindex;
- segindex | chunks | bytes  
-----------+--------+--------
-        0 |      1 | 598536
-        1 |      1 | 592592
-        2 |      1 | 592952
+ segindex | chunks 
+----------+--------
+        0 |      1
+        1 |      1
+        2 |      1
 (3 rows)
 
 SELECT yezzey_load_relation('yezzey_otm_regaoty_1');

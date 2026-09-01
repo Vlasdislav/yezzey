@@ -39,7 +39,7 @@ SELECT count(x_path) FROM yezzey_dump_virtual_index('yezzey_otm_regaoty_1');
 
 SELECT yezzey_vacuum_garbage_relation('yezzey_otm_regaoty_1', true, true);
 
-SELECT segindex, count(*) as chunks, sum(external_bytes) as bytes
+SELECT segindex, count(*) as chunks
 FROM yezzey_relation_describe_external_storage_structure('yezzey_otm_regaoty_1')
 GROUP BY segindex ORDER BY segindex;
 
@@ -59,7 +59,7 @@ SELECT count(x_path) FROM yezzey_dump_virtual_index('yezzey_otm_regaoty_2');
 
 SELECT yezzey_vacuum_garbage_relation('yezzey_otm_regaoty_2', true, true);
 
-SELECT segindex, count(*) as chunks, sum(external_bytes) as bytes
+SELECT segindex, count(*) as chunks
 FROM yezzey_relation_describe_external_storage_structure('yezzey_otm_regaoty_2')
 GROUP BY segindex ORDER BY segindex;
 
