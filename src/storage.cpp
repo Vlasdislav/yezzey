@@ -266,7 +266,8 @@ void loadRelationSegment(Relation aorel, Oid loadSpcOid, Oid orig_relnode,
 
   elog(yezzey_ao_log_level, "contructed path %s", path);
   if (!ensureFilepathLocal(path))
-    loadSegmentFromExternalStorage(aorel, nspname, relname, segno, coords, path);
+    loadSegmentFromExternalStorage(aorel, nspname, relname, segno, coords,
+                                   path);
   if (local_path) {
     pfree(local_path);
   }
