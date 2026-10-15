@@ -16,6 +16,12 @@
 #include "url.h"
 #include "yezzey_meta.h"
 
+static constexpr size_t kPrefetchBufferSize = 1024 * 1024;
+
+#ifndef SMGR_AO_SEGMENT_SKIPPED
+#define SMGR_AO_SEGMENT_SKIPPED (-2)
+#endif
+
 typedef struct YVirtFD {
   int y_vfd; /* Either YEZZEY_* preserved fd or pg internal fd >= 9 */
 
@@ -88,6 +94,39 @@ int writeprepare(std::shared_ptr<IOadv> ioadv, int64_t modcount,
        modcount);
 
   return 0;
+}
+
+static bool prefetch_remote_file(YVirtFD &yfd) {
+  File local_file = OpenTemporaryFile(false, "yezzey-read");
+  if (local_file < 0)
+    return false;
+
+  std::vector<char> buffer(kPrefetchBufferSize);
+  off_t offset = 0;
+
+  while (!yfd.handler->reader_empty()) {
+    size_t amount = buffer.size();
+    if (!yfd.handler->io_read(buffer.data(), &amount) || amount == 0)
+      goto failed;
+
+    size_t written = 0;
+    while (written < amount) {
+      int rc = FileWrite(local_file, buffer.data() + written, amount - written,
+                         offset + written, WAIT_EVENT_DATA_FILE_WRITE);
+      if (rc <= 0)
+        goto failed;
+      written += rc;
+    }
+    offset += amount;
+  }
+
+  yfd.localTmpVfd = local_file;
+  yfd.y_vfd = local_file;
+  return true;
+
+failed:
+  FileClose(local_file);
+  return false;
 }
 
 EXTERNC int yezzey_FileSync(File file, uint32 wait_event_info) {
@@ -170,6 +209,18 @@ static File yezzey_AORelOpenSegFile_internal(Oid reloid, const char *nspname,
           YVirtFD_cache.erase(yezzey_fd);
           return -1;
         }
+      }
+
+      if (skip_unreadable_ao_segments &&
+          (fileFlags & O_ACCMODE) == O_RDONLY &&
+          !prefetch_remote_file(yfd)) {
+        elog(WARNING,
+             "yezzey: skipping unreadable AO segment file \"%s\" for "
+             "relation \"%s.%s\" (content %u.%ld on segment %d)",
+             yfd.filepath.c_str(), yfd.nspname.c_str(), yfd.relname.c_str(),
+             yfd.coord.filenode, (long)yfd.coord.blkno, GpIdentity.segindex);
+        YVirtFD_cache.erase(yezzey_fd);
+        return SMGR_AO_SEGMENT_SKIPPED;
       }
     }
   } else {

@@ -85,6 +85,7 @@ int multipart_chunksize = 0;
 bool use_gpg_crypto = false;
 
 bool use_otm_feature = false;
+bool skip_unreadable_ao_segments = false;
 
 /* YPROXY */
 
@@ -1247,6 +1248,14 @@ static void yezzey_define_gucs() {
   DefineCustomBoolVariable("yezzey.use_otm_feature", "use OTM feature", NULL,
                            &use_otm_feature, false, PGC_BACKEND, 0, NULL, NULL,
                            NULL);
+
+  DefineCustomBoolVariable(
+      "yezzey.skip_unreadable_ao_segments",
+      "Skip AO segments that cannot be read from external storage.",
+      "Downloads an AO segment to a temporary local file before scanning it. "
+      "A failed download skips the complete segment and produces incomplete "
+      "query results.",
+      &skip_unreadable_ao_segments, false, PGC_SUSET, 0, NULL, NULL, NULL);
 
   DefineCustomEnumVariable("yezzey.log_level",
                            "Log level for yezzey functions.", NULL,

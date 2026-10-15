@@ -141,6 +141,21 @@ postgres=# select yezzey.load_relation('test');
 (1 row)
 ```
 
+### Emergency skip of unreadable AO segments
+
+When an external-storage read cannot be completed, the default is to fail the
+query. For emergency access to the remaining data, a superuser can enable:
+
+```sql
+SET yezzey.skip_unreadable_ao_segments = on;
+```
+
+In this mode Yezzey downloads a complete AO segment to a temporary local file
+before it is scanned. If that download fails, Yezzey logs a `WARNING` with the
+relation and segment identifiers and the scan skips the whole AO segment. The
+query result is intentionally incomplete; do not enable the setting where
+complete results are required.
+
 ### Get info about offloaded data
 
 Call `yezzey.offload_relation_status(relation regclass)`.
